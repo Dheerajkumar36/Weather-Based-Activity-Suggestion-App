@@ -1,19 +1,21 @@
 package com.example.weatheractivityapp.controller;
 
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import java.util.HashMap;
+
 import java.util.Map;
 
-@RestController
+@Controller
 public class WeatherController {
 
     private final String API_KEY = "04bb5404f6f81901daf5e7ed0d4e09a4";
 
     @GetMapping("/activity")
-    public Map<String, String> getActivity(@RequestParam String city) {
+    public String getActivity(@RequestParam String city, Model model) {
+
         String url = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + API_KEY + "&units=metric";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -23,24 +25,16 @@ public class WeatherController {
 
         String activity;
         switch (weather.toLowerCase()) {
-            case "rain":
-                activity = "Stay home and watch a movie!";
-                break;
-            case "clear":
-                activity = "Go for a walk outside!";
-                break;
-            case "clouds":
-                activity = "Perfect day to read a book!";
-                break;
-            default:
-                activity = "Do whatever you love!";
+            case "rain" -> activity = "Stay home and watch a movie!";
+            case "clear" -> activity = "Go for a walk outside!";
+            case "clouds" -> activity = "Perfect day to read a book!";
+            default -> activity = "Do whatever you love!";
         }
 
-        Map<String, String> result = new HashMap<>();
-        result.put("city", city);
-        result.put("weather", weather);
-        result.put("activity", activity);
+        model.addAttribute("city", city);
+        model.addAttribute("weather", weather);
+        model.addAttribute("activity", activity);
 
-        return result;
+        return "result"; // return the HTML page
     }
 }
