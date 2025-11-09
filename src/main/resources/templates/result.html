@@ -1,7 +1,12 @@
-<html><body>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
 <h1>Weather Result</h1>
-<p>City: ${city}</p>
-<p>Weather: ${weather}</p>
-<p>Suggested Activity: ${activity}</p>
+
+<p>City: <span th:text="${city}"></span></p>
+<p>Weather: <span th:text="${weather}"></span></p>
+<p>Suggested Activity: <span th:text="${activity}"></span></p>
+
 <a href="/">Search again</a>
-</body></html>
+</body>
+</html>
