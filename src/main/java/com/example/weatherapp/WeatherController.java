@@ -9,8 +9,9 @@ import java.util.Map;
 @RestController
 public class WeatherController {
 
-    @Value("${WEATHER_API_KEY}")
-    private String apiKey;
+    @Value("${openweather.api.key}")
+private String apiKey;
+;
 
     @CrossOrigin(origins = "*")
     @GetMapping("/activity")
