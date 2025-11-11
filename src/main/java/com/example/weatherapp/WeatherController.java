@@ -1,44 +1,44 @@
 package com.example.weatherapp;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 public class WeatherController {
 
+    @Value("${WEATHER_API_KEY}")
+    private String apiKey;
+
     @CrossOrigin(origins = "*")
     @GetMapping("/activity")
-    public Map<String, Object> getActivity(@RequestParam String city) {
+    public Map<String, String> getActivity(@RequestParam String city) throws Exception {
+        Map<String, String> map = new HashMap<>();
 
-        String apiKey = System.getenv("WEATHER_API_KEY"); // Your API key from environment
-
+        // Call OpenWeatherMap API
+        String url = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + apiKey + "&units=metric";
         RestTemplate restTemplate = new RestTemplate();
-        String url = "https://api.openweathermap.org/data/2.5/weather?q="
-                     + city + "&appid=" + apiKey + "&units=metric";
+        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
 
-        JsonNode root = restTemplate.getForObject(url, JsonNode.class);
+        if (response == null || response.get("main") == null) {
+            map.put("weather", "Unknown");
+            map.put("temperature", "Unknown");
+            map.put("activity", "City not found");
+            return map;
+        }
 
-        String weather = root.path("weather").get(0).path("description").asText();
-        double temp = root.path("main").path("temp").asDouble(); // Temperature in °C
+        Map<String, Object> main = (Map<String, Object>) response.get("main");
+        double temp = ((Number) main.get("temp")).doubleValue();
 
-        String activity = suggestActivity(weather);
+        map.put("weather", temp > 25 ? "Sunny" : "Cloudy/Rainy");
+        map.put("temperature", temp + "°C");
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("weather", weather);
-        result.put("temperature", temp + "°C");
-        result.put("activity", activity);
+        if (temp > 30) map.put("activity", "Go swimming or stay cool");
+        else if (temp > 20) map.put("activity", "Go for a walk");
+        else map.put("activity", "Stay home and read a book");
 
-        return result;
-    }
-
-    private String suggestActivity(String weather) {
-        weather = weather.toLowerCase();
-        if (weather.contains("rain")) return "Stay inside and enjoy tea or music.";
-        if (weather.contains("sunny")) return "Great time to go for a walk or cycling.";
-        if (weather.contains("cloud")) return "Maybe go for a relaxed outdoor stroll.";
-        return "Check conditions locally and decide.";
+        return map;
     }
 }
